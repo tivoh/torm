@@ -1,6 +1,6 @@
 <?php
 
-namespace Torm;
+namespace Tivoh\Torm;
 
 class Database {
 	const MySQL = 'mysql';

@@ -1,6 +1,6 @@
 <?php
 
-namespace Torm;
+namespace Tivoh\Torm;
 
 abstract class Model {
 	public function __construct(array $data = null) {
