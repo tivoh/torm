@@ -4,9 +4,10 @@ namespace Torm;
 
 use Yosymfony\Toml\Toml;
 
-define('ROOT_DIR', dirname(dirname(dirname(__DIR__))) . '/');
+define('ROOT_DIR', dirname(__DIR__) . '/');
+define('VENDOR_DIR', dirname(dirname(ROOT_DIR)) . '/');
 
-require ROOT_DIR . 'vendor/autoload.php';
+require VENDOR_DIR . 'autoload.php';
 
 $input = 'config/models';
 $output = 'models';
