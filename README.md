@@ -6,6 +6,24 @@ This can be overwritten with the `--input` command-line argument.
 
 The generated classes are put in to `models/`. This can be overwritten with the `--output` command-line argument.
 
+## Installation
+
+Add the following to your composer.json:
+
+```json
+"repositories": [
+	{
+		"url": "https://github.com/tivoh/torm",
+		"type": "git"
+	}
+],
+"require": {
+	"tivoh/torm": "~0.1"
+}
+```
+
+Then run `composer update`.
+
 ## Example: user.toml => User.php
 
 ### user.toml
