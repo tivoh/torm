@@ -35,7 +35,7 @@ for ($i = 1; $i < $argc; ++$i) {
 if ($command != '') {
 	switch ($command) {
 		case 'make:models':
-			makeModels($output);
+			makeModels($input, $output);
 			break;
 		case 'help':
 		default:
@@ -51,7 +51,7 @@ function printHelp() {
 	echo "\t" . 'make:models - Generate the model classes from config/models/*.toml' . "\n";
 }
 
-function makeModels($output) {
+function makeModels($input, $output) {
 	$models = glob($input . '*.toml');
 	$modelTemplate = file_get_contents(ROOT_DIR . 'templates/Model.php');
 
