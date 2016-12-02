@@ -1,0 +1,165 @@
+<?php
+
+namespace Torm;
+
+use Yosymfony\Toml\Toml;
+
+define('ROOT_DIR', dirname(__DIR__) . '/');
+
+require ROOT_DIR . 'vendor/autoload.php';
+
+$input = 'config/models';
+$output = 'models';
+$command = '';
+
+for ($i = 1; $i < $argc; ++$i) {
+	if ($argv[$i][0] == '-') {
+		switch ($argv[$i]) {
+			case '--input':
+				$input = preg_replace('#//+#', '/', $argv[++$i] . '/');
+				break;
+			case '--output':
+				$output = preg_replace('#//+#', '/', $argv[++$i] . '/');
+				break;
+		}
+	}
+	else {
+		$command = $argv[$i];
+
+		// if we need additional args for the command
+		// switch ($command) {}
+	}
+}
+
+if ($command != '') {
+	switch ($command) {
+		case 'make:models':
+			makeModels($output);
+			break;
+		case 'help':
+		default:
+			printHelp();
+	}
+}
+else {
+	printHelp();
+}
+
+function printHelp() {
+	echo 'torm [COMMAND]' . "\n";
+	echo "\t" . 'make:models - Generate the model classes from config/models/*.toml' . "\n";
+}
+
+function makeModels($output) {
+	$models = glob($input . '*.toml');
+	$modelTemplate = file_get_contents(ROOT_DIR . 'templates/Model.php');
+
+	preg_match('/<FIELD>(.*?)<\/FIELD>/s', $modelTemplate, $matches);
+	$fieldTemplate = $matches[1];
+
+	preg_match('/<GETTER>(.*?)<\/GETTER>/s', $modelTemplate, $matches);
+	$getterTemplate = $matches[1];
+
+	preg_match('/<SETTER>(.*?)<\/SETTER>/s', $modelTemplate, $matches);
+	$setterTemplate = $matches[1];
+
+	preg_match('/<FINDER>(.*?)<\/FINDER>/s', $modelTemplate, $matches);
+	$finderTemplate = $matches[1];
+	
+	preg_match('/<FOREIGN>(.*?)<\/FOREIGN>/s', $modelTemplate, $matches);
+	$foreignTemplate = $matches[1];
+
+	if (is_dir($output) == false) {
+		mkdir($output);
+	}
+
+	foreach ($models as $model) {
+		$data = Toml::Parse(file_get_contents($model));
+		echo 'Creating Model ' . $data['class'] . "\n";
+		
+		$code = $modelTemplate;
+		$code = str_replace('<CLASS>', $data['class'], $code);
+		$code = str_replace('<TABLE>', $data['table'], $code);
+		
+		$fields = [];
+		$setters = [];
+		$getters = [];
+		$finders = [];
+		$foreigns = [];
+		$fieldNames = [];
+		$classFields = [];
+
+		foreach ($data['fields'] as $field) {
+			if (array_key_exists('codeName', $field) == false) {
+				$field['codeName'] = Model::normalizeKey($field['name']);
+			}
+
+			$fieldNames[$field['name']] = $field['codeName'];
+			$classFields[$field['name']] = "'" . $field['name'] . "' => ['" . $field['codeName'] . "', " . getFieldType($field['type']) . "]";
+
+			$fields[] = str_replace('<PROPERTY NAME>', $field['codeName'], $fieldTemplate);
+			$getters[] = str_replace(
+				['<METHOD NAME>', '<PROPERTY NAME>'],
+				[ucfirst($field['codeName']), $field['codeName']],
+				$getterTemplate
+			);
+			$setters[] = str_replace(
+				['<METHOD NAME>', '<PROPERTY NAME>'],
+				[ucfirst($field['codeName']), $field['codeName']],
+				$setterTemplate
+			);
+			$finders[] = str_replace(
+				['<METHOD NAME>', '<FIELD NAME>'],
+				[ucfirst($field['codeName']), $field['name']],
+				$finderTemplate
+			);
+
+			if (strtolower(trim($field['type'])) == 'primary') {
+				$code = str_replace('<PRIMARY KEY>', $field['codeName'], $code);
+			}
+		}
+		
+		if (array_key_exists('foreign', $data)) {
+			foreach ($data['foreign'] as $foreign) {
+				if (array_key_exists('codeName', $foreign) == false) {
+					$foreign['codeName'] = Model::normalizeKey($foreign['name']);
+				}
+
+				$method = ucfirst($fieldNames[$foreign['by']]);
+				
+				$fields[] = str_replace('<PROPERTY NAME>', $foreign['codeName'], $fieldTemplate);
+				$parts = explode('.', $foreign['key']);
+				$foreigns[] = str_replace(
+					['<METHOD NAME>', '<PROPERTY NAME>', '<FOREIGN CLASS>', '<FOREIGN KEY>', '<BY METHOD NAME>'],
+					[ucfirst($foreign['codeName']), $foreign['name'], $parts[0], $parts[1], $method],
+					$foreignTemplate
+				);
+			}
+		}
+
+		$code = str_replace('<FIELD NAMES>', implode(",\n\t\t", $classFields), $code);
+		$code = preg_replace('/<FIELD>(.*?)<\/FIELD>/s', implode('', $fields), $code);
+		$code = preg_replace('/<GETTER>(.*?)<\/GETTER>/s', implode('', $getters), $code);
+		$code = preg_replace('/<FOREIGN>(.*?)<\/FOREIGN>/s', implode('', $foreigns), $code);
+		$code = preg_replace('/<SETTER>(.*?)<\/SETTER>/s', implode('', $setters), $code);
+		$code = preg_replace('/<FINDER>(.*?)<\/FINDER>/s', implode('', $finders), $code);
+
+		file_put_contents($output . $data['class'] . '.php', preg_replace('/(\r\n?|\n){3,}/', "\n\n", $code));
+	}
+}
+
+function getFieldType($type) {
+	switch (strtolower(trim($type))) {
+		case 'bool':
+			return '\PDO::PARAM_BOOL';
+		case 'int':
+		case 'primary':
+			return '\PDO::PARAM_INT';
+		case 'string':
+		case 'text':
+		case 'timestamp':
+			return '\PDO::PARAM_STR';
+	}
+
+	return -1;
+}
