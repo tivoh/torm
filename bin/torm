@@ -9,8 +9,8 @@ define('VENDOR_DIR', dirname(dirname(ROOT_DIR)) . '/');
 
 require VENDOR_DIR . 'autoload.php';
 
-$input = 'config/models';
-$output = 'models';
+$input = 'config/models/';
+$output = 'models/';
 $command = '';
 
 for ($i = 1; $i < $argc; ++$i) {
