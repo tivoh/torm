@@ -182,3 +182,24 @@ class User extends Torm\Model {
 }
 
 ```
+
+## Foreign tables
+
+You can specify a foreign key in your table spec with the following toml code
+
+```toml
+[[foreign]]
+	# The name of the field in the Model (getAuthor())
+	name = "author"
+
+	# The model and field that is the key for this field
+	key = "User.id"
+
+	# The table column to connect the key by
+	by = "author_id"
+```
+
+This way you can get the author of e.g. a blog post with `Post::findById($postId)->getAuthor()`.
+
+Please be aware that the author is **not** (yet?) saved when `$post->save()` is called.
+Furthermore, the object is cached, so if you change `author_id` in this example, `getAuthor()` will still return the old author.
