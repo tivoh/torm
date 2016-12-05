@@ -1,5 +1,7 @@
 <?php
 
+namespace Tivoh\Torm;
+
 use Yosymfony\Toml\Toml;
 
 define('ROOT_DIR', dirname(__DIR__) . '/');
