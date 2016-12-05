@@ -1,6 +1,6 @@
 <?php
 
-class <CLASS> extends Torm\Model {
+class <CLASS> extends Tivoh\Torm\Model {
 	const table = '<TABLE>';
 	const primaryKey = '<PRIMARY KEY>';
 
