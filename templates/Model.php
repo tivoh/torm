@@ -21,7 +21,7 @@ class <CLASS> extends Tivoh\Torm\Model {
 <FOREIGN>
 	public function get<METHOD NAME>() {
 		if ($this-><PROPERTY NAME> == null) {
-			$objects = <FOREIGN CLASS>::find(['<FOREIGN KEY>' => $this->get<BY METHOD NAME>()], 1);
+			$objects = <FOREIGN CLASS>::find(['<FOREIGN KEY>' => $this->get<BY METHOD NAME>()], ['limit' => 1]);
 
 			if ($objects) {
 				$this-><PROPERTY NAME> = $objects[0];
