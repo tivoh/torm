@@ -65,7 +65,7 @@ abstract class Model {
 			$query->order($options['order']);
 		}
 
-		if (array_key_exists('limit', $options) && is_numeric($option['limit']) && $options['limit'] >= 1) {
+		if (array_key_exists('limit', $options) && is_numeric($options['limit']) && $options['limit'] >= 1) {
 			$rows = $query->some($options['limit']);
 		}
 		else {
