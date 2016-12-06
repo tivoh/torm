@@ -40,7 +40,7 @@ class <CLASS> extends Tivoh\Torm\Model {
 
 <FINDER>
 	public static function findOneBy<METHOD NAME>($value) {
-		$objects = static::find(['<FIELD NAME>' => $value], 1);
+		$objects = static::find(['<FIELD NAME>' => $value], ['limit' => 1]);
 
 		if ($objects) {
 			return $objects[0];
