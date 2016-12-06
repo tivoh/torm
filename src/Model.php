@@ -54,15 +54,19 @@ abstract class Model {
 		}, $key);
 	}
 
-	public static function find($params, $limit = -1) {
+	public static function find($params, array $options = array()) {
 		$query = Query::get(static::table);
 
 		foreach ($params as $key => $val) {
 			$query->where($key, $val);
 		}
 
-		if (is_numeric($limit) && $limit >= 1) {
-			$rows = $query->some($limit);
+		if (array_key_exists('order', $options)) {
+			$query->order($options['order']);
+		}
+
+		if (array_key_exists('limit', $options) && is_numeric($option['limit']) && $options['limit'] >= 1) {
+			$rows = $query->some($options['limit']);
 		}
 		else {
 			$rows = $query->all();

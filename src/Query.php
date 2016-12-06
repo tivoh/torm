@@ -4,6 +4,7 @@ namespace Tivoh\Torm;
 
 class Query {
 	protected $whereStr = '';
+	protected $orderStr = '';
 	protected $paramCount = 0;
 	protected $params = array();
 	protected $table;
@@ -34,6 +35,17 @@ class Query {
 		++$this->paramCount;
 
 		return $this;
+	}
+
+	public function order($order) {
+		if ($this->orderStr != '') {
+			$this->orderStr .= ', ';
+		}
+		else {
+			$this->orderStr = ' ORDER BY ';
+		}
+
+		$this->orderStr .= $order;
 	}
 
 	public function all($offset = -1, $returnType = \PDO::FETCH_ASSOC) {
@@ -81,6 +93,7 @@ class Query {
 	public function run() {
 		$query = $this->query;
 		$query .= $this->whereStr;
+		$query .= $this->orderStr;
 
 		if (is_numeric($this->limit) && $this->limit > 0) {
 			$query .= ' LIMIT ' . $this->limit;

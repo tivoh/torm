@@ -47,8 +47,8 @@ class <CLASS> extends Tivoh\Torm\Model {
 		}
 	}
 
-	public static function findBy<METHOD NAME>($value) {
-		return static::find(['<FIELD NAME>' => $value]);
+	public static function findBy<METHOD NAME>($value, array $options = array()) {
+		return static::find(['<FIELD NAME>' => $value], $options);
 	}
 </FINDER>
 }
